@@ -77,6 +77,19 @@ impl<F: Formatter> UnixBar<F> {
         }
     }
 
+    pub fn run_no_stdin(&mut self) {
+        let (wid_tx, wid_rx) = chan::async();
+        for widget in &mut self.widgets {
+            widget.spawn_notifier(wid_tx.clone());
+        }
+        self.show();
+        loop {
+            chan_select! {
+                wid_rx.recv() => self.show(),
+            }
+        }
+    }
+
     fn show(&mut self) {
         let vals: Vec<Format> = self.widgets.iter().map(|ref w| w.current_value()).collect();
         let line = self.formatter.format_all(&vals);
