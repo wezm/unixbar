@@ -63,7 +63,13 @@ impl AwesomeFormatter {
                 xml.end_elem()
             }
             Format::NoSeparator(ref f) => self.format_span(xml, f),
-            Format::Padding(_, ref f) => self.format_span(xml, f),
+            Format::Padding(n, ref f) => {
+                xml.begin_elem("span")?;
+                xml.text(&" ".repeat(n as usize))?;
+                xml.end_elem()?;
+
+                self.format_span(xml, f)
+            }
             Format::Clickable(ref act, ref f) => match act {
                 _ => self.format_span(xml, f), // TODO
             },
